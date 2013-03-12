@@ -2,6 +2,8 @@ from pylab import *
 
 close('all')
 
+nu = 1/0.485e+5
+u_tau = 0.41302030e-1
 Re2000 = loadtxt('profiles/Re2000.prof', comments='%')
 
 yt = Re2000[:,0]
