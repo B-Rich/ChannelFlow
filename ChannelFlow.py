@@ -116,7 +116,7 @@ xlabel(r'$y^+$')
 ylabel(r'turbulent production')
 
 figure()
-transport_exact = -t_diff + p_diff
+transport_exact = -t_diff - p_diff
 transport_ke = -numericalDerivative(nu_t_ke*dkdy)
 plot(yp, transport_exact, label='exact')
 plot(yp, transport_ke, label='ke')
