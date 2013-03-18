@@ -2,6 +2,26 @@ from pylab import *
 
 close('all')
 
+# function to calculate numerical derivatives
+def numericalDerivative(u):
+  dudy = zeros(N)
+  for i in range(0,N):
+    if i > 0 and i < N-1:
+      dym = yp[i+1]-yp[i]
+      dyp = yp[i]-yp[i-1]
+      dudy[i] = u[i+1]*dym/((dym+dyp)*dyp) \
+          + u[i]*(dyp-dym)/(dyp*dym) \
+          - u[i-1]*dyp/((dym+dyp)*dym)
+    elif i > 0:
+      dy = yp[i]-yp[i-1]
+      dudy[i] = (u[i]-u[i-1])/dy
+    elif i < N-1:
+      dy = yp[i+1]-yp[i]
+      dudy[i] = (u[i+1]-u[i])/dy
+    
+  return dudy
+
+# Simulation parameters
 Re = 2003
 nu = 1/0.485e+5
 u_tau = 0.41302030e-1
@@ -30,37 +50,28 @@ k = 0.5*(up*up+vp*vp+wp*wp)
 
 N = size(yp)
 
-# figure()
-# plot(yp, log(yp)/kappa+5)
-# plot(yp, Up)
+# Check log profile
+figure()
+plot(yp[1:], log(yp[1:])/kappa+5, label='logarithmic')
+plot(yp, Up, label='exact')
+legend(loc='best')
+xlabel(r'$y^+$')
+ylabel(r'$U^+$')
 
-def numericalDerivative(u):
-  dudy = zeros(N)
-  for i in range(0,N):
-    if i > 0 and i < N-1:
-      dym = yp[i+1]-yp[i]
-      dyp = yp[i]-yp[i-1]
-      dudy[i] = u[i+1]*dym/((dym+dyp)*dyp) \
-          + u[i]*(dyp-dym)/(dyp*dym) \
-          - u[i-1]*dyp/((dym+dyp)*dym)
-    elif i > 0:
-      dy = yp[i]-yp[i-1]
-      dudy[i] = (u[i]-u[i-1])/dy
-    elif i < N-1:
-      dy = yp[i+1]-yp[i]
-      dudy[i] = (u[i+1]-u[i])/dy
-    
-  return dudy
-
+# Check mixing length validity
 dUdy = numericalDerivative(Up)
 dkdy = numericalDerivative(k)
 l_m = kappa*delta*yp
 l_exact = sqrt(abs(uvp/dUdy**2))
 
 figure()
-plot(yp, l_m)
-plot(yp, l_exact)
+plot(yp, l_m, label='Prandtl mixing length model')
+plot(yp, l_exact, label='exact mixing length')
+legend(loc='best')
+xlabel(r'$y^+$')
+ylabel(r'$l_m$')
 
+# Compare ke and exact Reynolds stress predictions
 uu_exact = up*up-2/3*k
 vv_exact = vp*vp-2/3*k
 ww_exact = wp*wp-2/3*k
@@ -90,18 +101,27 @@ plot(yp, ww_ke, linestyle='--', label='ww', color='g')
 plot(yp, uv_ke, linestyle='--', label='uv', color='m')
 plot(yp, uw_ke, linestyle='--', label='uw', color='c')
 plot(yp, vw_ke, linestyle='--', label='vw', color='y')
-legend()
+legend(loc='best')
+xlabel(r'$y^+$')
+ylabel(r'$\overline{u_iu_j}-\frac{2}{3}k\delta_{ij}$')
+
+# ke estimate of the production term
+production_ke = nu_t_ke*dUdy**2
 
 figure()
-production_ke = nu_t_ke*dUdy**2
 plot(yp, production, label='exact')
 plot(yp, production_ke, label='ke')
+legend(loc='best')
+xlabel(r'$y^+$')
+ylabel(r'turbulent production')
 
 figure()
 transport_exact = -t_diff + p_diff
 transport_ke = -numericalDerivative(nu_t_ke*dkdy)
 plot(yp, transport_exact, label='exact')
 plot(yp, transport_ke, label='ke')
-legend()
+legend(loc='best')
+xlabel(r'$y^+$')
+ylabel(r'turbulent transport')
 
 show()
